@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Match</title>
+  <style>
+    body {
+      background: #121212;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 80px);
+      grid-gap: 10px;
+    }
+    .card {
+      width: 80px;
+      height: 80px;
+      background: #1f1f1f;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .card.flipped {
+      background: #00ffcc;
+      color: #000;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧠 Memory Match</h1>
+  <div class="grid" id="grid"></div>
+
+  <script>
+    const symbols = ['🍎','🍌','🍇','🍉','🍒','🍍','🥝','🍓'];
+    const cards = [...symbols, ...symbols].sort(() => 0.5 - Math.random());
+    const grid = document.getElementById('grid');
+
+    let firstCard = null;
+    let lockBoard = false;
+
+    cards.forEach(symbol => {
+      const card = document.createElement('div');
+      card.classList.add('card');
+      card.dataset.symbol = symbol;
+      card.textContent = '';
+      grid.appendChild(card);
+
+      card.addEventListener('click', () => {
+        if (lockBoard || card.classList.contains('flipped') || card === firstCard) return;
+
+        card.classList.add('flipped');
+        card.textContent = symbol;
+
+        if (!firstCard) {
+          firstCard = card;
+        } else {
+          if (firstCard.dataset.symbol === card.dataset.symbol) {
+            firstCard = null;
+          } else {
+            lockBoard = true;
+            setTimeout(() => {
+              firstCard.classList.remove('flipped');
+              card.classList.remove('flipped');
+              firstCard.textContent = '';
+              card.textContent = '';
+              firstCard = null;
+              lockBoard = false;
+            }, 1000);
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

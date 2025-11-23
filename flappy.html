@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flappy Bird</title>
+  <style>
+    body {
+      margin: 0;
+      background: #121212;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    canvas {
+      border: 2px solid #00ffcc;
+      background: #1f1f1f;
+    }
+    .controls {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    }
+    .controls button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #00ffcc;
+    color: #000;
+    transition: background 0.2s;
+    }
+    .controls button:hover {
+    background: #00ddb3;
+    }
+    </style>
+</head>
+<body>
+  <canvas id="flappyCanvas" width="320" height="480"></canvas>
+  <div class="controls">
+    <button id="restartBtn">Restart</button>
+    <button id="pauseBtn">Pause</button>
+    <button id="exitBtn">Exit</button>
+  </div>  
+  <script>
+    const canvas = document.getElementById("flappyCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let frames = 0;
+    const DEGREE = Math.PI / 180;
+
+    const bird = {
+      x: 50,
+      y: 150,
+      radius: 12,
+      gravity: 0.25,
+      jump: 4.6,
+      velocity: 0,
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = "#00ffcc";
+        ctx.fill();
+        ctx.closePath();
+      },
+      flap() {
+        this.velocity = -this.jump;
+      },
+      update() {
+        this.velocity += this.gravity;
+        this.y += this.velocity;
+        if (this.y + this.radius > canvas.height) {
+          gameOver();
+        }
+      }
+    };
+
+    const pipes = [];
+    const pipeWidth = 50;
+    const gap = 100;
+    const pipeFrequency = 100;
+
+    function drawPipes() {
+      for (let i = 0; i < pipes.length; i++) {
+        const p = pipes[i];
+        ctx.fillStyle = "#ff0044";
+        ctx.fillRect(p.x, 0, pipeWidth, p.top);
+        ctx.fillRect(p.x, p.bottom, pipeWidth, canvas.height - p.bottom);
+      }
+    }
+
+    function updatePipes() {
+      if (frames % pipeFrequency === 0) {
+        const top = Math.random() * (canvas.height - gap - 100) + 20;
+        pipes.push({
+          x: canvas.width,
+          top: top,
+          bottom: top + gap
+        });
+      }
+      for (let i = 0; i < pipes.length; i++) {
+        pipes[i].x -= 2;
+        const p = pipes[i];
+        if (
+          bird.x + bird.radius > p.x &&
+          bird.x - bird.radius < p.x + pipeWidth &&
+          (bird.y - bird.radius < p.top || bird.y + bird.radius > p.bottom)
+        ) {
+          gameOver();
+        }
+      }
+    }
+
+    function gameOver() {
+      alert("Game Over!");
+      document.location.reload();
+    }
+
+    function draw() {
+      ctx.fillStyle = "#1f1f1f";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      bird.draw();
+      drawPipes();
+    }
+
+    function update() {
+      bird.update();
+      updatePipes();
+    }
+
+    function loop() {
+      update();
+      draw();
+      frames++;
+      requestAnimationFrame(loop);
+    }
+    const restartBtn = document.getElementById('restartBtn');
+    const pauseBtn   = document.getElementById('pauseBtn');
+    const exitBtn    = document.getElementById('exitBtn');
+
+    restartBtn.addEventListener('click', () => {
+    board.fill(null);
+    currentPlayer = 'X';
+    winnerEl.textContent = '';
+    render();
+        });
+
+    let paused = false;
+    pauseBtn.addEventListener('click', () => {
+    paused = !paused;
+    pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+    });
+
+    exitBtn.addEventListener('click', () => {
+    window.location.href = 'index.html';  
+    });
+
+    document.addEventListener("keydown", () => bird.flap());
+    loop();
+  </script>
+</body>
+</html>
